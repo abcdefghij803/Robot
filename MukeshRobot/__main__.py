@@ -542,23 +542,66 @@ For more info about Meowsteric updates check website 🎄👀""",parse_mode=Pars
                ]
             ),
         )
-    elif query.data=="donation_help":
-        query.message.edit_caption("""Hey, i am glad to know you are interested in donating us that mean a lot :)
+elif query.data == "donation_help":
+    query.message.edit_caption(
+        """Hey, I am glad to know you are interested in donating us, that means a lot :)
 
-We provide 24×7 managment and music service so we also need some help for it, donate now via:-
-• Upi id » @kittyxupdates
+We provide 24×7 management and music service, so we also need some help for it. Donate now via:-
+• UPI ID » @kittyxupdates
 • You can also donate by contacting [developer](https://t.me/about_ur_moonshining/5) ✅
 
-Your small amount can help us and meowsteric to grow more ✨""",parse_mode=ParseMode.MARKDOWN,
-            
-            reply_markup=InlineKeyboardMarkup(
-                [ 
-                    [
-                        InlineKeyboardButton(text="• Donate •", url="https://t.me/kittyxupdates"),InlineKeyboardButton(text="• Support •", callback_data="mukesh_support")
-                    ]
+Your small amount can help us and Meowsteric to grow more ✨""",
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(text="• Donate •", url="https://t.me/kittyxupdates"),
+                    InlineKeyboardButton(text="• Support •", callback_data="mukesh_support"),
+                ],
+                [
+                    InlineKeyboardButton(text="⭐ Pay 10 Star ⭐", callback_data="confirm_pay_10_star"),
                 ]
-            ),
-            )  
+            ]
+        ),
+    )
+
+# Step 1: Confirmation Prompt
+@bot.callback_query_handler(filters.regex("confirm_pay_10_star"))
+def confirm_pay_10_star(update: Update, context: CallbackContext):
+    query = update.callback_query
+    query.message.reply_text(
+        "Are you sure you want to pay ⭐ 10 Star ⭐?",
+        reply_markup=InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(text="✅ Yes, Confirm", callback_data="pay_10_star"),
+                    InlineKeyboardButton(text="❌ No, Cancel", callback_data="cancel_payment"),
+                ]
+            ]
+        ),
+    )
+
+# Step 2: Final Payment Confirmation & Notify Owner
+@bot.callback_query_handler(filters.regex("pay_10_star"))
+def handle_pay_10_star(update: Update, context: CallbackContext):
+    user = update.callback_query.from_user
+    user_id = user.id
+    user_name = user.full_name
+    OWNER_ID = 7686412397  # Aapki ID (@moonshining1)
+
+    # Notify the owner
+    context.bot.send_message(
+        chat_id=OWNER_ID,  
+        text=f"⭐ {user_name} (ID: {user_id}) has paid 10 Star!",
+    )
+
+    # Notify the user
+    update.callback_query.message.reply_text("Thank you for your support! ⭐")
+
+# Step 3: Cancel Payment
+@bot.callback_query_handler(filters.regex("cancel_payment"))
+def cancel_payment(update: Update, context: CallbackContext):
+    update.callback_query.answer("Payment canceled ❌", show_alert=True)  
 def Moon_about_callback(update: Update, context: CallbackContext):
     query = update.callback_query
     if query.data == "moon_":
