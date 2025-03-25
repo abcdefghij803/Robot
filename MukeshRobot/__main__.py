@@ -1146,13 +1146,19 @@ Made [Meowsteric bot 😺](https://t.me/Meowsterxbot) with love by ᴅᴇᴠᴇ�
     moon_callback_handler = CallbackQueryHandler(
         Moon_about_callback, pattern=r"moon_", run_async=True
     )
-    confirm_pay_10_star = CallbackQueryHandler(
+    donation_callback_handler = CallbackQueryHandler(
+        donation_help, pattern=r"donation_help", run_async=True
+    )
+
+    confirm_pay_10_star_handler = CallbackQueryHandler(
         confirm_pay_10_star, pattern=r"confirm_pay_10_star", run_async=True
     )
-    pay_10_star = CallbackQueryHandler(
-        pay_10_star, pattern=r"pay_10_star",run_async=True
+
+    pay_10_star_handler = CallbackQueryHandler(
+        handle_pay_10_star, pattern=r"pay_10_star", run_async=True
     )
-    cancel_payment = CallbackQueryHandler(
+
+    cancel_payment_handler = CallbackQueryHandler(
         cancel_payment, pattern=r"cancel_payment", run_async=True
     )
     mukeshrobot_main_handler = CallbackQueryHandler(
@@ -1172,9 +1178,10 @@ Made [Meowsteric bot 😺](https://t.me/Meowsterxbot) with love by ᴅᴇᴠᴇ�
     dispatcher.add_error_handler(error_callback)
     dispatcher.add_handler(source_callback_handler)
     dispatcher.add_handler(moon_callback_handler)
-    dispatcher.add_handler(confirm_pay_10_star)
-    dispatcher.add_handler(handle_pay_10_star)
-    dispatcher.add_handler(cancel_payment)
+    dispatcher.add_handler(donation_callback_handler)
+    dispatcher.add_handler(confirm_pay_10_star_handler)
+    dispatcher.add_handler(pay_10_star_handler)
+    dispatcher.add_handler(cancel_payment_handler)
     LOGGER.info("Using long polling.")
     updater.start_polling(timeout=15, read_latency=4, drop_pending_updates=True)
 
