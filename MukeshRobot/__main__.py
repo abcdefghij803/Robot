@@ -566,7 +566,6 @@ Your small amount can help us and Meowsteric to grow more ✨""",
     )
 
 # Step 1: Confirmation Prompt
-@bot.callback_query_handler(filters.regex("confirm_pay_10_star"))
 def confirm_pay_10_star(update: Update, context: CallbackContext):
     query = update.callback_query
     query.message.reply_text(
@@ -582,9 +581,9 @@ def confirm_pay_10_star(update: Update, context: CallbackContext):
     )
 
 # Step 2: Final Payment Confirmation & Notify Owner
-@bot.callback_query_handler(filters.regex("pay_10_star"))
 def handle_pay_10_star(update: Update, context: CallbackContext):
-    user = update.callback_query.from_user
+    query = update.callback_query
+    user = query.from_user
     user_id = user.id
     user_name = user.full_name
     OWNER_ID = 7686412397  # Aapki ID (@moonshining1)
@@ -596,12 +595,12 @@ def handle_pay_10_star(update: Update, context: CallbackContext):
     )
 
     # Notify the user
-    update.callback_query.message.reply_text("Thank you for your support! ⭐")
+    query.message.reply_text("Thank you for your support! ⭐")
 
 # Step 3: Cancel Payment
-@bot.callback_query_handler(filters.regex("cancel_payment"))
 def cancel_payment(update: Update, context: CallbackContext):
-    update.callback_query.answer("Payment canceled ❌", show_alert=True)  
+    query = update.callback_query
+    query.answer("Payment canceled ❌", show_alert=True)
 def Moon_about_callback(update: Update, context: CallbackContext):
     query = update.callback_query
     if query.data == "moon_":
@@ -1164,6 +1163,9 @@ Made [Meowsteric bot 😺](https://t.me/Meowsterxbot) with love by ᴅᴇᴠᴇ�
     dispatcher.add_error_handler(error_callback)
     dispatcher.add_handler(source_callback_handler)
     dispatcher.add_handler(moon_callback_handler)
+    bot.add_handler(CallbackQueryHandler(confirm_pay_10_star, pattern="confirm_pay_10_star"))
+    bot.add_handler(CallbackQueryHandler(handle_pay_10_star, pattern="pay_10_star"))
+    bot.add_handler(CallbackQueryHandler(cancel_payment, pattern="cancel_payment"))
     LOGGER.info("Using long polling.")
     updater.start_polling(timeout=15, read_latency=4, drop_pending_updates=True)
 
