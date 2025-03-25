@@ -1146,10 +1146,6 @@ Made [Meowsteric bot 😺](https://t.me/Meowsterxbot) with love by ᴅᴇᴠᴇ�
     moon_callback_handler = CallbackQueryHandler(
         Moon_about_callback, pattern=r"moon_", run_async=True
     )
-    donation_callback_handler = CallbackQueryHandler(
-        donation_help, pattern=r"donation_help", run_async=True
-    )
-
     confirm_pay_10_star_handler = CallbackQueryHandler(
         confirm_pay_10_star, pattern=r"confirm_pay_10_star", run_async=True
     )
@@ -1178,7 +1174,6 @@ Made [Meowsteric bot 😺](https://t.me/Meowsterxbot) with love by ᴅᴇᴠᴇ�
     dispatcher.add_error_handler(error_callback)
     dispatcher.add_handler(source_callback_handler)
     dispatcher.add_handler(moon_callback_handler)
-    dispatcher.add_handler(donation_callback_handler)
     dispatcher.add_handler(confirm_pay_10_star_handler)
     dispatcher.add_handler(pay_10_star_handler)
     dispatcher.add_handler(cancel_payment_handler)
