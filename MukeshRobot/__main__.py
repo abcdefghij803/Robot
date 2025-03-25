@@ -542,11 +542,8 @@ For more info about Meowsteric updates check website 🎄👀""",parse_mode=Pars
                ]
             ),
         )
-# Donation Help Handler
-def donation_help(update: Update, context: CallbackContext):
-    query = update.callback_query
-    if query.data == "donation_help":  # ✅ FIX: 'elif' hata kar 'if' kiya
-    query.message.edit_caption(
+    elif query.data=="donation_help":
+        query.message.edit_caption(
         """Hey, I am glad to know you are interested in donating us, that means a lot :)
 
 We provide 24×7 management and music service, so we also need some help for it. Donate now via:-
