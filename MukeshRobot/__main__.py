@@ -44,6 +44,7 @@ from MukeshRobot import (
 from MukeshRobot.modules import ALL_MODULES
 from MukeshRobot.modules.helper_funcs.chat_status import is_user_admin
 from MukeshRobot.modules.helper_funcs.misc import paginate_modules
+from MukeshRobot.modules.no_sql import users_db as sql
 
 
 def get_readable_time(seconds: int) -> str:
