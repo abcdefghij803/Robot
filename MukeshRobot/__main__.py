@@ -542,7 +542,10 @@ For more info about Meowsteric updates check website 🎄👀""",parse_mode=Pars
                ]
             ),
         )
-elif query.data == "donation_help":
+# Donation Help Handler
+def donation_help(update: Update, context: CallbackContext):
+    query = update.callback_query
+    if query.data == "donation_help":  # ✅ FIX: 'elif' hata kar 'if' kiya
     query.message.edit_caption(
         """Hey, I am glad to know you are interested in donating us, that means a lot :)
 
