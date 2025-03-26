@@ -3,7 +3,7 @@ from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 
 from MukeshRobot import pbot, SUPPORT_CHAT
-from MukeshRobot.modules.sql.afk_sql import set_afk, rm_afk, is_afk as sql_is_afk
+from MukeshRobot.modules.sql.afk_sql import set_afk, rm_afk
 from MukeshRobot.modules.no_sql.afk_db import add_afk, remove_afk, is_afk as nosql_is_afk
 
 # AFK GIF for default replies
@@ -73,9 +73,9 @@ async def set_afk_status(client, message: Message):
             ),
         )
 
-@pbot.on_message(filters.private | filters.group | filters.supergroup)
+@pbot.on_message(filters.private | filters.group)
 async def check_afk_status(client, message: Message):
-    """Auto-remove AFK when user sends any message in groups, supergroups, or DM."""
+    """Auto-remove AFK when user sends any message in groups or DM."""
     user_id = message.from_user.id
     afk_status, _ = await nosql_is_afk(user_id)  # Check NoSQL
 
@@ -121,7 +121,7 @@ __help__ = """
 - `/afk <replied to media> <reason>` → Set AFK with media & reason.
 
 **AFK Auto-removal:**
-- Send any message in **group, supergroup, or DM**, and your AFK will be **automatically removed**.
+- Send any message in **group or DM**, and your AFK will be **automatically removed**.
 - Bot will tell how long you were AFK.
 
 **Other Commands:**
