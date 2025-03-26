@@ -489,6 +489,7 @@ def demote(update: Update, context: CallbackContext) -> str:
 def refresh_admin(update, _):
     try:
         ADMIN_CACHE.pop(update.effective_chat.id)
+        
 @connection_status
 @bot_admin
 @can_promote
