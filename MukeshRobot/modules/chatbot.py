@@ -1,6 +1,7 @@
 import html
 import json
 import re
+from time import sleep
 import requests
 from telegram import (
     CallbackQuery,
@@ -24,21 +25,20 @@ import MukeshRobot.modules.sql.chatbot_sql as sql
 from MukeshRobot import BOT_ID, BOT_NAME, BOT_USERNAME, dispatcher
 from MukeshRobot.modules.helper_funcs.chat_status import user_admin, user_admin_no_reply
 from MukeshRobot.modules.log_channel import gloggable
-
-GEMINI_API_URL = "https://gemini-proxy-hinata.onrender.com"
+from MukeshAPI import api
 
 @user_admin_no_reply
 @gloggable
 def mukeshrm(update: Update, context: CallbackContext) -> str:
-    query = update.callback_query
-    user = update.effective_user
-    match = re.match(r"rm_chat(.+?)", query.data)
+    query: Optional[CallbackQuery] = update.callback_query
+    user: Optional[User] = update.effective_user
+    match = re.match(r"rm_chat\((.+?)\)", query.data)
     if match:
         user_id = match.group(1)
-        chat = update.effective_chat
+        chat: Optional[Chat] = update.effective_chat
         is_mukesh = sql.set_mukesh(chat.id)
         if is_mukesh:
-            sql.set_mukesh(user_id)
+            is_mukesh = sql.set_mukesh(user_id)
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
                 f"ᴀɪ ᴅɪꜱᴀʙʟᴇᴅ\n"
@@ -51,23 +51,25 @@ def mukeshrm(update: Update, context: CallbackContext) -> str:
                 ),
                 parse_mode=ParseMode.HTML,
             )
+
     return ""
+
 
 @user_admin_no_reply
 @gloggable
 def mukeshadd(update: Update, context: CallbackContext) -> str:
-    query = update.callback_query
-    user = update.effective_user
-    match = re.match(r"add_chat(.+?)", query.data)
+    query: Optional[CallbackQuery] = update.callback_query
+    user: Optional[User] = update.effective_user
+    match = re.match(r"add_chat\((.+?)\)", query.data)
     if match:
         user_id = match.group(1)
-        chat = update.effective_chat
+        chat: Optional[Chat] = update.effective_chat
         is_mukesh = sql.rem_mukesh(chat.id)
         if is_mukesh:
-            sql.rem_mukesh(user_id)
+            is_mukesh = sql.rem_mukesh(user_id)
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
-                f"ᴀɪ ᴇɴᴀʙʟᴇᴅ\n"
+                f"ᴀɪ ᴇɴᴀʙʟᴇ\n"
                 f"<b>ᴀᴅᴍɪɴ :</b> {mention_html(user.id, html.escape(user.first_name))}\n"
             )
         else:
@@ -77,7 +79,9 @@ def mukeshadd(update: Update, context: CallbackContext) -> str:
                 ),
                 parse_mode=ParseMode.HTML,
             )
+
     return ""
+
 
 @user_admin
 @gloggable
@@ -89,7 +93,7 @@ def mukesh(update: Update, context: CallbackContext):
             [
                 InlineKeyboardButton(text="ᴇɴᴀʙʟᴇ", callback_data="add_chat({})"),
                 InlineKeyboardButton(text="ᴅɪsᴀʙʟᴇ", callback_data="rm_chat({})"),
-            ]
+            ],
         ]
     )
     message.reply_text(
@@ -97,6 +101,7 @@ def mukesh(update: Update, context: CallbackContext):
         reply_markup=keyboard,
         parse_mode=ParseMode.HTML,
     )
+
 
 def mukesh_message(context: CallbackContext, message):
     reply_message = message.reply_to_message
@@ -107,42 +112,37 @@ def mukesh_message(context: CallbackContext, message):
     elif reply_message:
         if reply_message.from_user.id == BOT_ID:
             return True
-    return False
+    else:
+        return False
+
 
 def chatbot(update: Update, context: CallbackContext):
     message = update.effective_message
     chat_id = update.effective_chat.id
     bot = context.bot
     is_mukesh = sql.is_mukesh(chat_id)
-    
     if is_mukesh:
         return
 
     if message.text and not message.document:
         if not mukesh_message(context, message):
             return
-        
         bot.send_chat_action(chat_id, action="typing")
+        url=api.chatgpt(message.text,mode="gf")["results"]
+        message.reply_text(url)
 
-        # Gemini Proxy API Request
-        payload = {"prompt": message.text}
 
-        try:
-            response = requests.post(GEMINI_API_URL, json=payload)
-            if response.status_code == 200:
-                reply_text = response.json().get("response", "Mujhe samajh nahi aaya.")
-                message.reply_text(reply_text)
-            else:
-                message.reply_text("Kuch gadbad hai, baad mein try karein.")
-        except Exception as e:
-            message.reply_text("Server se connect nahi ho pa raha.")
+
+
+
+
 
 CHATBOTK_HANDLER = CommandHandler("chatbot", mukesh, run_async=True)
 ADD_CHAT_HANDLER = CallbackQueryHandler(mukeshadd, pattern=r"add_chat", run_async=True)
 RM_CHAT_HANDLER = CallbackQueryHandler(mukeshrm, pattern=r"rm_chat", run_async=True)
 CHATBOT_HANDLER = MessageHandler(
     Filters.text
-    & (~Filters.regex(r"^#[^\s]+") & ~Filters.regex(r"^!") & ~Filters.regex(r"^/")),
+    & (~Filters.regex(r"^#[^\s]+") & ~Filters.regex(r"^!") & ~Filters.regex(r"^\/")),
     chatbot,
     run_async=True,
 )
@@ -152,7 +152,7 @@ dispatcher.add_handler(CHATBOTK_HANDLER)
 dispatcher.add_handler(RM_CHAT_HANDLER)
 dispatcher.add_handler(CHATBOT_HANDLER)
 
-handlers = [
+__handlers__ = [
     ADD_CHAT_HANDLER,
     CHATBOTK_HANDLER,
     RM_CHAT_HANDLER,
