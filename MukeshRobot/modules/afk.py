@@ -1,4 +1,3 @@
-import asyncio
 import time
 from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
@@ -10,8 +9,24 @@ from MukeshRobot.modules.no_sql.afk_db import add_afk, remove_afk, is_afk as nos
 # AFK GIF for default replies
 AFK_GIF = "https://envs.sh/SAy.mp4"
 
-# Store AFK timestamps
+# Dictionary to track AFK timestamps
 AFK_TIMES = {}
+
+async def remove_afk_status(user_id, user_name, message):
+    """Remove AFK status and notify the user."""
+    afk_time = AFK_TIMES.pop(user_id, None)
+    if afk_time:
+        duration = time.time() - afk_time
+        hours, remainder = divmod(int(duration), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        time_text = f"{hours}h {minutes}m {seconds}s"
+    else:
+        time_text = "Unknown duration"
+
+    rm_afk(user_id)  # SQL
+    await remove_afk(user_id)  # NoSQL
+
+    await message.reply(f"**Welcome back, {user_name}!**\nYou were AFK for `{time_text}`.")
 
 @pbot.on_message(filters.command("afk"))
 async def set_afk_status(client, message: Message):
@@ -58,66 +73,39 @@ async def set_afk_status(client, message: Message):
             ),
         )
 
-@pbot.on_message(filters.command("back"))
-async def remove_afk_status(client, message: Message):
+@pbot.on_message(filters.private | filters.group | filters.supergroup)
+async def check_afk_status(client, message: Message):
+    """Auto-remove AFK when user sends any message in groups, supergroups, or DM."""
     user_id = message.from_user.id
+    afk_status, _ = await nosql_is_afk(user_id)  # Check NoSQL
 
-    # Calculate AFK duration
-    afk_time = AFK_TIMES.pop(user_id, None)
-    if afk_time:
+    if afk_status:
+        await remove_afk_status(user_id, message.from_user.first_name, message)
+
+@pbot.on_message(filters.mentioned | filters.reply)
+async def afk_reply(client, message: Message):
+    """Reply with AFK status if mentioned or replied to an AFK user."""
+    user_id = message.reply_to_message.from_user.id if message.reply_to_message else None
+    if not user_id:
+        return
+
+    afk_status, reason = await nosql_is_afk(user_id)  # NoSQL check
+    
+    if afk_status:
+        afk_time = AFK_TIMES.get(user_id, time.time())
         duration = time.time() - afk_time
         hours, remainder = divmod(int(duration), 3600)
         minutes, seconds = divmod(remainder, 60)
         time_text = f"{hours}h {minutes}m {seconds}s"
-    else:
-        time_text = "Unknown duration"
-
-    # Remove AFK status
-    rm_afk(user_id)  # SQL
-    await remove_afk(user_id)  # NoSQL
-    
-    await message.reply(f"**{message.from_user.first_name} is no longer AFK!**\nAFK duration: `{time_text}`")
-
-@pbot.on_message(filters.mentioned | filters.reply)
-async def afk_reply(client, message: Message):
-    if message.reply_to_message:
-        user_id = message.reply_to_message.from_user.id
-        afk_status, reason = await nosql_is_afk(user_id)  # NoSQL check
         
-        if afk_status:
-            afk_time = AFK_TIMES.get(user_id, time.time())
-            duration = time.time() - afk_time
-            hours, remainder = divmod(int(duration), 3600)
-            minutes, seconds = divmod(remainder, 60)
-            time_text = f"{hours}h {minutes}m {seconds}s"
-            
-            await message.reply(
-                f"**{message.reply_to_message.from_user.first_name}** is currently AFK!\n"
-                f"Reason: `{reason}`\nAFK since: `{time_text}`"
-            )
-
-@pbot.on_message(filters.group)
-async def group_afk_detection(client, message: Message):
-    user_id = message.from_user.id
-    afk_status, reason = await nosql_is_afk(user_id)
-
-    if afk_status:
-        afk_time = AFK_TIMES.pop(user_id, None)
-        if afk_time:
-            duration = time.time() - afk_time
-            hours, remainder = divmod(int(duration), 3600)
-            minutes, seconds = divmod(remainder, 60)
-            time_text = f"{hours}h {minutes}m {seconds}s"
-        else:
-            time_text = "Unknown duration"
-
-        rm_afk(user_id)
-        await remove_afk(user_id)
-
-        await message.reply(f"**Welcome back, {message.from_user.first_name}!**\nAFK duration: `{time_text}`")
+        await message.reply(
+            f"**{message.reply_to_message.from_user.first_name}** is currently AFK!\n"
+            f"Reason: `{reason}`\nAFK since: `{time_text}`"
+        )
 
 @pbot.on_message(filters.command("afkusers"))
 async def list_afk_users(client, message: Message):
+    """List all currently AFK users."""
     afk_users = await get_afk_users()
     if afk_users:
         users_list = "\n".join([f"User ID: {user['user_id']}, Reason: {user['reason']}" for user in afk_users])
@@ -126,15 +114,20 @@ async def list_afk_users(client, message: Message):
         await message.reply("No users are currently AFK.")
 
 __help__ = """
-» Available commands for AFK:
+**AFK Commands:**
+- `/afk` → Set yourself AFK.
+- `/afk <reason>` → Set AFK with a reason.
+- `/afk <replied to media>` → Set AFK with media.
+- `/afk <replied to media> <reason>` → Set AFK with media & reason.
 
-● `/afk` - Set yourself AFK.
-● `/afk <reason>` - Set AFK with a reason.
-● `/afk <replied to photo or sticker>` - Set AFK with media.
-● `/afk <replied to media> <reason>` - Set AFK with media and reason.
-● `/back` - Remove AFK status and show AFK duration.
+**AFK Auto-removal:**
+- Send any message in **group, supergroup, or DM**, and your AFK will be **automatically removed**.
+- Bot will tell how long you were AFK.
 
-Now bot will automatically remove your AFK when you send a message!
+**Other Commands:**
+- `/afkusers` → See who is AFK.
+
+💡 Now, bot **automatically removes AFK** when you message anywhere!
 """
 
 __mod_name__ = "AFK"
