@@ -491,6 +491,7 @@ def refresh_admin(update, _):
         ADMIN_CACHE.pop(update.effective_chat.id)
 
 
+
 @connection_status
 @bot_admin
 @can_promote
@@ -513,6 +514,9 @@ def set_title(update: Update, context: CallbackContext):
         user_member = chat.get_member(user_id)
     except BadRequest:
         message.reply_text("» ᴜɴᴀʙʟᴇ ᴛᴏ ғᴇᴛᴄʜ ᴜsᴇʀ ᴅᴇᴛᴀɪʟs. ᴍᴀʏʙᴇ ᴛʜᴇʏ ᴀʀᴇ ɴᴏᴛ ɪɴ ᴛʜɪs ᴄʜᴀᴛ.")
+        return
+    except Exception as e:
+        message.reply_text(f"» ᴇʀʀᴏʀ: {str(e)}")
         return
 
     # Bot खुद का title सेट नहीं कर सकता
@@ -549,7 +553,8 @@ def set_title(update: Update, context: CallbackContext):
         )
     except BadRequest as err:
         message.reply_text(f"» ғᴀɪʟᴇᴅ ᴛᴏ sᴇᴛ ᴛɪᴛʟᴇ: {err.message}")
-        return
+    except Exception as e:
+        message.reply_text(f"» ᴜɴᴇxᴘᴇᴄᴛᴇᴅ ᴇʀʀᴏʀ: {str(e)}")
         
 @bot_admin
 @can_pin
