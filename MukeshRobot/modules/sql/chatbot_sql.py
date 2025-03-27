@@ -1,9 +1,6 @@
 import threading
-
 from sqlalchemy import Column, String
-
 from MukeshRobot.modules.sql import BASE, SESSION
-
 
 class MukeshChats(BASE):
     __tablename__ = "mukesh_chats"
@@ -12,10 +9,8 @@ class MukeshChats(BASE):
     def __init__(self, chat_id):
         self.chat_id = chat_id
 
-
 MukeshChats.__table__.create(checkfirst=True)
 INSERTION_LOCK = threading.RLock()
-
 
 def is_mukesh(chat_id):
     try:
@@ -24,7 +19,6 @@ def is_mukesh(chat_id):
     finally:
         SESSION.close()
 
-
 def set_mukesh(chat_id):
     with INSERTION_LOCK:
         mukeshchat = SESSION.query(MukeshChats).get(str(chat_id))
@@ -32,7 +26,6 @@ def set_mukesh(chat_id):
             mukeshchat = MukeshChats(str(chat_id))
         SESSION.add(mukeshchat)
         SESSION.commit()
-
 
 def rem_mukesh(chat_id):
     with INSERTION_LOCK:
