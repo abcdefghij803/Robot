@@ -499,62 +499,65 @@ def refresh_admin(update, _):
 def set_title(update: Update, context: CallbackContext):
     bot = context.bot
     args = context.args
-    
+
     chat = update.effective_chat
     message = update.effective_message
 
-    # Extract user and title
     user_id, title = extract_user_and_text(message, args)
-
-    if not user_id:
-        message.reply_text("» ɪ ᴅᴏɴ'ᴛ ᴋɴᴏᴡ ᴡʜᴏ ᴛʜᴀᴛ ᴜsᴇʀ ɪs, ᴘʟᴇᴀsᴇ ᴍᴇɴᴛɪᴏɴ ᴛʜᴇᴍ ᴏʀ ᴜsᴇ ᴀ ᴠᴀʟɪᴅ ᴜsᴇʀ ɪᴅ.")
-        return
-
     try:
         user_member = chat.get_member(user_id)
-    except BadRequest:
-        message.reply_text("» ᴜɴᴀʙʟᴇ ᴛᴏ ғᴇᴛᴄʜ ᴜsᴇʀ ᴅᴇᴛᴀɪʟs. ᴍᴀʏʙᴇ ᴛʜᴇʏ ᴀʀᴇ ɴᴏᴛ ɪɴ ᴛʜɪs ᴄʜᴀᴛ.")
-        return
-    except Exception as e:
-        message.reply_text(f"» ᴇʀʀᴏʀ: {str(e)}")
+    except:
         return
 
-    # Bot खुद का title सेट नहीं कर सकता
-    if user_id == bot.id:
-        message.reply_text("» ɪ ᴄᴀɴ'ᴛ sᴇᴛ ᴛɪᴛʟᴇ ғᴏʀ ᴍʏsᴇʟғ.")
+    if not user_id:
+        message.reply_text(
+            "» ɪ ᴅᴏɴ'ᴛ ᴋɴᴏᴡ ᴡʜᴏ's ᴛʜᴀᴛ ᴜsᴇʀ, ɴᴇᴠᴇʀ sᴇᴇɴ ʜɪᴍ ɪɴ ᴀɴʏ ᴏғ ᴛʜᴇ ᴄʜᴀᴛs ᴡʜᴇʀᴇ ɪ ᴀᴍ ᴩʀᴇsᴇɴᴛ !",
+        )
         return
 
-    # केवल एडमिन्स के लिए Title सेट किया जा सकता है
     if user_member.status == "creator":
-        message.reply_text("» ᴛʜᴀᴛ ᴜsᴇʀ ɪs ᴛʜᴇ ᴏᴡɴᴇʀ ᴏғ ᴛʜᴇ ᴄʜᴀᴛ. ɪ ᴄᴀɴ'ᴛ ᴄʜᴀɴɢᴇ ᴛʜᴇɪʀ ᴛɪᴛʟᴇ.")
+        message.reply_text(
+            "» ᴛʜᴀᴛ ᴜsᴇʀ ɪs ᴏᴡɴᴇʀ ᴏғ ᴛʜᴇ ᴄʜᴀᴛ ᴀɴᴅ ɪ ᴅᴏɴ'ᴛ ᴡᴀɴᴛ ᴛᴏ ᴩᴜᴛ ᴍʏsᴇʟғ ɪɴ ᴅᴀɴɢᴇʀ.",
+        )
         return
 
     if user_member.status != "administrator":
-        message.reply_text("» ɪ ᴄᴀɴ ᴏɴʟʏ sᴇᴛ ᴛɪᴛʟᴇ ғᴏʀ ᴀᴅᴍɪɴs!")
+        message.reply_text(
+            "» ɪ ᴄᴀɴ ᴏɴʟʏ sᴇᴛ ᴛɪᴛʟᴇ ғᴏʀ ᴀᴅᴍɪɴs !",
+        )
         return
 
-    # Title Blank नहीं हो सकता
+    if user_id == bot.id:
+        message.reply_text(
+            "» ɪ ᴄᴀɴ'ᴛ sᴇᴛ ᴛɪᴛʟᴇ ғᴏʀ ᴍʏsᴇʟғ, ᴍʏ ᴏᴡɴᴇʀ ᴅɪᴅɴ'ᴛ ᴛᴏʟᴅ ᴍᴇ ᴛᴏ ᴅᴏ sᴏ.",
+        )
+        return
+
     if not title:
-        message.reply_text("» ʏᴏᴜ ᴄᴀɴ'ᴛ sᴇᴛ ᴀ ʙʟᴀɴᴋ ᴛɪᴛʟᴇ!")
+        message.reply_text(
+            "» ʏᴏᴜ ᴛʜɪɴᴋ ᴛʜᴀᴛ sᴇᴛᴛɪɴɢ ʙʟᴀɴᴋ ᴛɪᴛʟᴇ ᴡɪʟʟ ᴄʜᴀɴɢᴇ sᴏᴍᴇᴛʜɪɴɢ ?"
+        )
         return
 
-    # Title 16 characters से ज्यादा नहीं हो सकता
     if len(title) > 16:
-        title = title[:16]  # Truncate to 16 characters
-        message.reply_text("» ᴛʜᴇ ᴛɪᴛʟᴇ ᴡᴀs ᴛᴏᴏ ʟᴏɴɢ, ɪᴛ ʜᴀs ʙᴇᴇɴ ᴛʀᴜɴᴄᴀᴛᴇᴅ ᴛᴏ 16 ᴄʜᴀʀᴀᴄᴛᴇʀs.")
+        message.reply_text(
+            "» ᴛʜᴇ ᴛɪᴛʟᴇ ʟᴇɴɢᴛʜ ɪs ʟᴏɴɢᴇʀ ᴛʜᴀɴ 16 ᴡᴏʀᴅs ᴏʀ ᴄʜᴀʀᴀᴄᴛᴇʀs sᴏ ᴛʀᴜɴᴄᴀᴛɪɴɢ ɪᴛ ᴛᴏ 16 ᴡᴏʀᴅs.",
+        )
 
     try:
         bot.setChatAdministratorCustomTitle(chat.id, user_id, title)
-        bot.sendMessage(
-            chat.id,
-            f"» sᴜᴄᴄᴇssғᴜʟʟʏ sᴇᴛ ᴛɪᴛʟᴇ ғᴏʀ <b>{html.escape(user_member.user.first_name)}</b> "
-            f"ᴛᴏ <b>{html.escape(title)}</b>!",
-            parse_mode=ParseMode.HTML,
+    except BadRequest:
+        message.reply_text(
+            "» ᴍᴀʏʙᴇ ᴛʜᴀᴛ ᴜsᴇʀ ɪs ɴᴏᴛ ᴩʀᴏᴍᴏᴛᴇᴅ ʙʏ ᴍᴇ ᴏʀ ᴍᴀʏʙᴇ ʏᴏᴜ sᴇɴᴛ sᴏᴍᴇᴛʜɪɴɢ ᴛʜᴀᴛ ᴄᴀɴ'ᴛ ʙᴇ sᴇᴛ ᴀs ᴛɪᴛʟᴇ."
         )
-    except BadRequest as err:
-        message.reply_text(f"» ғᴀɪʟᴇᴅ ᴛᴏ sᴇᴛ ᴛɪᴛʟᴇ: {err.message}")
-    except Exception as e:
-        message.reply_text(f"» ᴜɴᴇxᴘᴇᴄᴛᴇᴅ ᴇʀʀᴏʀ: {str(e)}")
+        return
+
+    bot.sendMessage(
+        chat.id,
+        f"» sᴜᴄᴄᴇssғᴜʟʟʏ sᴇᴛ ᴛɪᴛʟᴇ ғᴏʀ <code>{user_member.user.first_name or user_id}</code> "
+        f"ᴛᴏ <code>{html.escape(title[:16])}</code>!",
+        parse_mode=ParseMode.HTML,
+    )
         
 @bot_admin
 @can_pin
