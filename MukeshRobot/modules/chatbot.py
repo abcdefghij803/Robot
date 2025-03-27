@@ -1,5 +1,4 @@
 import html
-import json
 import requests
 import re
 from telegram import (
@@ -24,7 +23,7 @@ from MukeshRobot.modules.helper_funcs.chat_status import user_admin, user_admin_
 from MukeshRobot.modules.log_channel import gloggable
 
 # ✅ Correct Gemini API Key (Make sure this is valid)
-GEMINI_API_KEY = "AIzaSyA6s-6vTk5RbSf2FgWFU3hIiuDEim8tub4"
+GEMINI_API_KEY = "AIzaSyBrMUGQvi3QcpjlIElaieCplhJquHhdGCg"
 GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateText?key={GEMINI_API_KEY}"
 
 def get_gemini_response(user_message):
@@ -39,7 +38,7 @@ def get_gemini_response(user_message):
     if response.status_code == 200:
         try:
             result = response.json()
-            return result["candidates"][0]["content"]["parts"][0]["text"]
+            return result["candidates"][0]["output"]  # ✅ Corrected Key
         except (KeyError, IndexError):
             return "Meow... I couldn't understand that. Try again! 🐱"
     else:
