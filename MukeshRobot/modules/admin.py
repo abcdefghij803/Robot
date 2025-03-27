@@ -10,6 +10,7 @@ from MukeshRobot import DRAGONS, dispatcher
 from MukeshRobot.modules.disable import DisableAbleCommandHandler
 from MukeshRobot.modules.helper_funcs.admin_rights import user_can_changeinfo
 from MukeshRobot.modules.helper_funcs.alternate import send_message
+from MukeshRobot.modules import user_db
 from MukeshRobot.modules.helper_funcs.chat_status import (
     ADMIN_CACHE,
     bot_admin,
