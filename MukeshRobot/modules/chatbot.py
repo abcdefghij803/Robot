@@ -1,4 +1,3 @@
-import html
 import requests
 import re
 from telegram import (
