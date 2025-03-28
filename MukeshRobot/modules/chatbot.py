@@ -23,7 +23,7 @@ from MukeshRobot.modules.helper_funcs.chat_status import user_admin, user_admin_
 from MukeshRobot.modules.log_channel import gloggable
 
 # ✅ Correct Gemini API Key (Make sure this is valid)
-GEMINI_API_KEY = "AIzaSyBrMUGQvi3QcpjlIElaieCplhJquHhdGCg"
+GEMINI_API_KEY = "AIzaSyDe8QugDUu56-E6LoXXUcviDtFKfT7f3EE"
 GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateText?key={GEMINI_API_KEY}"
 
 def get_gemini_response(user_message):
